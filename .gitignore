@@ -1,0 +1,11 @@
+# Go
+services/device-gateway/device-gateway
+*.exe
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# OS
+.DS_Store
