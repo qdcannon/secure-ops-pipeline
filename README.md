@@ -19,7 +19,9 @@ event's signature/checksum and detects reporting gaps.
 Requires Go 1.22+ and Python 3.10+.
 
 ```bash
-# 1. Install Python dependencies
+# 1. Create and activate a virtual environment, then install dependencies
+python3 -m venv .venv
+source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
 # 2. Start the processor (subscribes for events)
