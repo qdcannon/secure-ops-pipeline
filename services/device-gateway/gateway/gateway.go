@@ -24,17 +24,17 @@ func New(publish func(adapter.Event) error) *Gateway {
 func (g *Gateway) Run(ctx context.Context, adapters []adapter.Adapter) {
 	events := make(chan adapter.Event, 100)
 
-	for _, a := range adapters {
-		go g.runAdapter(ctx, a, events)
+	for _, a := range adapters { //"_", is actual value of event "a"
+		go g.runAdapter(ctx, a, events) //run go routine for current adapter
 	}
 
 	for {
 		select {
-		case ev := <-events:
-			if err := g.publish(ev); err != nil {
+		case ev := <-events: // got something from events channel
+			if err := g.publish(ev); err != nil { // try to publsih event
 				log.Printf("publish failed for device %s: %v", ev.DeviceID, err)
 			}
-		case <-ctx.Done():
+		case <-ctx.Done(): //terminate if we program killed
 			return
 		}
 	}
@@ -43,19 +43,19 @@ func (g *Gateway) Run(ctx context.Context, adapters []adapter.Adapter) {
 func (g *Gateway) runAdapter(ctx context.Context, a adapter.Adapter, out chan<- adapter.Event) {
 	defer a.Close()
 
-	if err := a.Connect(ctx); err != nil {
+	if err := a.Connect(ctx); err != nil { //simulate conncting to hardware device
 		log.Printf("connect failed for %s (%s): %v", a.DeviceID(), a.DeviceType(), err)
 		return
 	}
 
-	evCh, errCh := a.Listen(ctx)
+	evCh, errCh := a.Listen(ctx) // listen on events channel and listen on error channel
 	for {
 		select {
-		case ev, ok := <-evCh:
+		case ev, ok := <-evCh: //get event and check if any problems with channel with "ok" boolean
 			if !ok {
 				return
 			}
-			out <- ev
+			out <- ev //send this on output only channel
 		case err, ok := <-errCh:
 			if !ok {
 				continue

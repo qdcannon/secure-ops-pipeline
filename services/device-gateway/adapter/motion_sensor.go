@@ -8,8 +8,26 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/big"
+	"strconv"
 	"time"
 )
+
+// init registers this adapter type so main.go can construct it dynamically
+// by name (from devices.json) via adapter.Build, without importing this
+// concrete type directly.
+func init() {
+	Register(DeviceMotionSensor, func(deviceID string, config map[string]string) (Adapter, error) {
+		interval := 2 * time.Second
+		if raw, ok := config["interval_seconds"]; ok {
+			secs, err := strconv.Atoi(raw)
+			if err != nil {
+				return nil, fmt.Errorf("invalid interval_seconds %q for %s: %w", raw, deviceID, err)
+			}
+			interval = time.Duration(secs) * time.Second
+		}
+		return NewMotionSensor(deviceID, interval)
+	})
+}
 
 // MotionSensor is a simulated motion sensor adapter. In place of real
 // hardware, it periodically emits a "motion"/"clear" reading, with an
@@ -37,20 +55,20 @@ func NewMotionSensor(deviceID string, interval time.Duration) (*MotionSensor, er
 	}, nil
 }
 
-func (m *MotionSensor) DeviceType() DeviceType { return DeviceMotionSensor }
-func (m *MotionSensor) DeviceID() string        { return m.deviceID }
+func (m *MotionSensor) DeviceType() DeviceType { return DeviceMotionSensor } //implement adapter interface function DeviceType
+func (m *MotionSensor) DeviceID() string       { return m.deviceID }         //implement adapter interface fucntion Device Id
 
-func (m *MotionSensor) Connect(ctx context.Context) error {
+func (m *MotionSensor) Connect(ctx context.Context) error { //implement adapter interface function Connect
 	// Real hardware: open serial/GPIO/network connection here.
 	return nil
 }
 
-func (m *MotionSensor) Sign(payload []byte, metadata map[string]string) (Event, error) {
-	sum := sha256.Sum256(payload)
-	checksum := hex.EncodeToString(sum[:])
-	sig := ed25519.Sign(m.privateKey, []byte(checksum))
+func (m *MotionSensor) Sign(payload []byte, metadata map[string]string) (Event, error) { //implement adapter interface function Sign
+	sum := sha256.Sum256(payload)                       //generate checksum
+	checksum := hex.EncodeToString(sum[:])              //encode checksum to string
+	sig := ed25519.Sign(m.privateKey, []byte(checksum)) //create signature for payload
 
-	return Event{
+	return Event{ //return event data shape
 		DeviceID:   m.deviceID,
 		DeviceType: DeviceMotionSensor,
 		Timestamp:  time.Now().UTC(),
@@ -71,34 +89,34 @@ func (m *MotionSensor) Listen(ctx context.Context) (<-chan Event, <-chan error) 
 	errs := make(chan error)
 
 	go func() {
-		defer close(events)
+		defer close(events) //Clean up
 		defer close(errs)
 
 		ticker := time.NewTicker(m.interval)
-		defer ticker.Stop()
+		defer ticker.Stop() //ticker cleanup
 
 		for {
 			select {
-			case <-ctx.Done():
+			case <-ctx.Done(): //channel has been cancelled likely by user SIGTERM
 				return
-			case <-ticker.C:
-				if skipBeat() {
+			case <-ticker.C: //if ticker channel
+				if skipBeat() { //simulate missing heartbeat
 					errs <- fmt.Errorf("simulated dropped reading (device silent this cycle)")
 					continue
 				}
 
 				state := "clear"
-				if triggered() {
+				if triggered() { //simulate motion
 					state = "motion"
 				}
-				payload := []byte(fmt.Sprintf(`{"state":"%s"}`, state))
+				payload := []byte(fmt.Sprintf(`{"state":"%s"}`, state)) //current state in payload
 
-				ev, err := m.Sign(payload, map[string]string{"zone": "front_entrance"})
+				ev, err := m.Sign(payload, map[string]string{"zone": "front_entrance"}) //signing for authentication
 				if err != nil {
 					errs <- err
 					continue
 				}
-				events <- ev
+				events <- ev //send to events channel
 			}
 		}
 	}()
@@ -110,8 +128,8 @@ func (m *MotionSensor) Close() error { return nil }
 
 // --- small helpers for simulation randomness, no math/rand global state ---
 
-func skipBeat() bool    { return randN(6) == 0 }
-func triggered() bool   { return randN(3) == 0 }
+func skipBeat() bool  { return randN(6) == 0 }
+func triggered() bool { return randN(3) == 0 }
 
 func randN(n int64) int64 {
 	v, _ := rand.Int(rand.Reader, big.NewInt(n))
