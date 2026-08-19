@@ -1,0 +1,27 @@
+{
+  "devices": [
+    {
+      "type": "motion_sensor",
+      "id": "motion-sensor-001",
+      "config": {
+        "zone": "front_entrance",
+        "interval_seconds": "2"
+      }
+    },
+    {
+      "type": "motion_sensor",
+      "id": "motion-sensor-002",
+      "config": {
+        "zone": "back_door",
+        "interval_seconds": "3"
+      }
+    },
+    {
+      "type": "camera",
+      "id": "camera-001",
+      "config": {
+        "zone": "driveway"
+      }
+    }
+  ]
+}
