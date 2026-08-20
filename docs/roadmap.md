@@ -28,9 +28,12 @@ Processor and API layers remain Python.
       fan-in to a shared channel, publish to ZeroMQ; per-device errors log
       and continue rather than killing the stream
 - [ ] Implement `camera` adapter (MVP)
-- [ ] Implement `motion_sensor` adapter (MVP)
+- [x] Implement `motion_sensor` adapter (MVP)
 - [ ] Stub `rfid_access`, `alarm`, `radio`, `presence` adapters (interface only, no logic)
-- [ ] Unit tests for adapter contract compliance (mock adapter satisfying `Adapter`)
+- [x] Unit tests for adapter contract compliance (mock adapter satisfying `Adapter`)
+- [x] Adapter registry pattern (`Register`/`Build`) + `devices.json` config-driven
+      construction — added beyond original scope, so new devices/instances
+      don't require code changes to `main.go`
 
 ## Phase 2 — Core Pipeline (Local, No Orchestration Yet)
 - [ ] Device Gateway: receive adapter events, verify signatures, forward via ZeroMQ
