@@ -9,5 +9,5 @@ set -euo pipefail
 
 cd "$(dirname "$0")/../services/device-gateway"
 
-echo "==> Running Go tests"
-GOPROXY=direct GOSUMDB=off go test ./... -v -cover
+echo "==> Running Go tests(with race detector)"
+GOPROXY=direct GOSUMDB=off go test ./... -v -cover -race
