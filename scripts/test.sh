@@ -9,5 +9,14 @@ set -euo pipefail
 
 cd "$(dirname "$0")/../services/device-gateway"
 
-echo "==> Running Go tests(with race detector)"
+echo "==> Checking gofmt"
+UNFORMATTED=$(gofmt -l .)
+if [ -n "$UNFORMATTED" ]; then
+	echo "The following files are not gofmt-formatted:"
+	echo "$UNFORMATTED"
+	echo "Run: gofmt -w ."
+	exit 1
+fi
+
+echo "==> Running Go tests (with race detector)"
 GOPROXY=direct GOSUMDB=off go test ./... -v -cover -race

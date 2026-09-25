@@ -17,6 +17,7 @@ const (
 	DeviceRFIDAccess   DeviceType = "rfid_access" // future
 	DeviceAlarm        DeviceType = "alarm"       // future
 	DeviceRadio        DeviceType = "radio"       // future
+	DevicePresence     DeviceType = "presence"    //future
 )
 
 // Event is the normalized, signed payload every adapter produces,
@@ -27,8 +28,8 @@ type Event struct {
 	DeviceType DeviceType        `json:"device_type"`
 	Timestamp  time.Time         `json:"timestamp"`
 	Payload    []byte            `json:"payload"`
-	Checksum   string            `json:"checksum"`  // SHA-256 hex of Payload
-	Signature  []byte            `json:"signature"` // Ed25519 signature over Checksum
+	Checksum   string            `json:"checksum"`   // SHA-256 hex of Payload
+	Signature  []byte            `json:"signature"`  // Ed25519 signature over Checksum
 	PublicKey  []byte            `json:"public_key"` // sender's public key, for verification
 	Metadata   map[string]string `json:"metadata"`
 }
