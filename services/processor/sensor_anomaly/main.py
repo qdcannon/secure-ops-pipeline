@@ -76,6 +76,16 @@ def main():
 
         ts = datetime.now(timezone.utc).isoformat()
         device_id = event["device_id"]
+        device_type = event["device_type"]
+
+        if device_type != "motion_sensor":
+            # This processor only understands motion-sensor payloads.
+            # Other device types (e.g. camera) get their own processor in
+            # a later phase (see docs/roadmap.md, Phase 2) -- skip rather
+            # than assuming every event has a "state" field.
+            print(f"[{ts}] skipping event device={device_id} type={device_type} (not handled by this processor)")
+            continue
+
         state = json.loads(base64.b64decode(event["payload"]))["state"]
 
         print(f"[{ts}] received event device={device_id} state={state}")
