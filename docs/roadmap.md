@@ -1,14 +1,18 @@
 # Secure Ops Pipeline — Roadmap
 
+**Standing reminder:** whenever a new script is added to `scripts/`, update
+the README's Quickstart/"Other available scripts" section in the same
+commit — don't let the two drift out of sync.
+
 This roadmap sequences the work so each phase produces something
 independently working and demoable, rather than one large all-at-once build.
 
 ---
 
 ## Phase 0 — Repo & Project Setup
-- [ ] Initialize repo structure (`services/`, `deploy/`, `docs/`, `scripts/`)
-- [ ] Write `architecture.md`, `roles-and-rbac.md`, `threat-model.md`, `adapters.md`
-- [ ] Set up `docker-compose.yml` skeleton (empty services, no logic yet)
+- [x] Initialize repo structure (`services/`, `deploy/`, `docs/`, `scripts/`)
+- [] Write `architecture.md`, `roles-and-rbac.md`, `threat-model.md`, `adapters.md`
+- [] Set up `docker-compose.yml` skeleton (empty services, no logic yet)
 - [ ] `scripts/gen-keys.sh` — generate test PKI keypairs for devices + roles
 
 ## Phase 1 — Device Adapter Interface (current focus)
@@ -27,10 +31,11 @@ Processor and API layers remain Python.
 - [x] Gateway orchestration (`gateway.go`): one goroutine per adapter,
       fan-in to a shared channel, publish to ZeroMQ; per-device errors log
       and continue rather than killing the stream
-- [ ] Implement `camera` adapter (MVP)
+- [x] Implement `camera` adapter (MVP)
 - [x] Implement `motion_sensor` adapter (MVP)
-- [ ] Stub `rfid_access`, `alarm`, `radio`, `presence` adapters (interface only, no logic)
+- [x] Stub `rfid_access`, `alarm`, `radio`, `presence` adapters (interface only, no logic)
 - [x] Unit tests for adapter contract compliance (mock adapter satisfying `Adapter`)
+- [x] Gateway package tests (goroutine orchestration, mock adapter, 100% coverage, race-clean)
 - [x] Adapter registry pattern (`Register`/`Build`) + `devices.json` config-driven
       construction — added beyond original scope, so new devices/instances
       don't require code changes to `main.go`
